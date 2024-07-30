@@ -1,13 +1,6 @@
-# Context-Aware Attentive Knowledge Tracing
+# AKT Code implemented by Context-Aware Attentive Knowledge Tracing 
+Retrieved from: https://github.com/arghosh/AKT
 KDD'2020: Context-Aware Attentive Knowledge Tracing (Pytorch implementation for AKT).
-
-
-This is the code for the paper:
-[Context-Aware Attentive Knowledge Tracing](https://arxiv.org/abs/2007.12324)  
-Aritra Ghosh, Neil Heffernan, Andrew S. Lan
-To be presented at [KDD 2020](https://www.kdd.org/kdd2020/).  
-
-
 
 If you find this code useful in your research then please cite  
 ```bash
@@ -42,11 +35,4 @@ Here is an example for using AKT-NonRasch model (on all datasets):
 ```
 python3 main.py --dataset assist2015 --model akt_cid
 ```
-
-### Errata
-Thanks to Rui Zou and Xuhao Li for pointing out a bug in line 306 of akt.py. It has been fixed now.
-
-
-Contact: Aritra Ghosh (aritraghosh.iem@gmail.com).
-
 
