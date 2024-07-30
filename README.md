@@ -1,16 +1,6 @@
-# AKT Code implemented by Context-Aware Attentive Knowledge Tracing 
-Retrieved from: https://github.com/arghosh/AKT
-KDD'2020: Context-Aware Attentive Knowledge Tracing (Pytorch implementation for AKT).
+# AKT Code implemented by Context-Aware Attentive Knowledge Tracing
 
-If you find this code useful in your research then please cite  
-```bash
-@inproceedings{ghosh2020context,
-  title={Context-Aware Attentive Knowledge Tracing},
-  author={Ghosh, Aritra and Heffernan, Neil and Lan, Andrew S},
-  booktitle={Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining},
-  year={2020}
-}
-``` 
+Retrieved from: https://github.com/arghosh/AKT
 
 ## Setups
 The requiring environment is as bellow:  
