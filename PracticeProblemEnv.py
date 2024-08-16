@@ -9,9 +9,10 @@ import json
 
 class PracticeProblemEnv(gym.Env):
     
-    def __init__(self, params, max_step=10, rew_func="mock", n_PperQ = 1, units=None, device="cuda"):
+    def __init__(self, params, max_step=10, QperS = 1, rew_func="mock", n_PperQ = 1, units=None, device="cuda"):
         super(PracticeProblemEnv, self).__init__()
         self.max_step = max_step
+        self.QperS = QperS
         self.rew_func = rew_func
         self.n_PperQ = n_PperQ if (self.rew_func == "mock") else None
 
@@ -20,11 +21,16 @@ class PracticeProblemEnv(gym.Env):
         self.kt_model = self._load_model()
         self.p_q_dict, self.q_p_dict = self._load_pq_qp_dict(units)
 
-        # print(f"self.p_q_dict: {self.p_q_dict}")
         self.actions = [*self.p_q_dict.keys()]
-        # print(f"self.actions: {self.actions}")
-        self.action_space = gym.spaces.Discrete(len(self.actions)) #[0,n_question-1]
-        self.observation_space = gym.spaces.Box(np.array([1,0,1]), np.array([self.params.n_question, 1, self.params.n_pid])) #[1,n_question]/[0,1]/[1,n_pid]
+
+        # self.action_space = gym.spaces.Discrete(len(self.actions)) 
+        self.action_space = gym.spaces.MultiDiscrete([len(self.actions)] * self.QperS) #[0,n_question-1]
+        # self.observation_space = gym.spaces.Box(np.array([1,0,1]), np.array([self.params.n_question, 1, self.params.n_pid])) #[1,n_question]/[0,1]/[1,n_pid]
+        self.observation_space = gym.spaces.Box(low=np.array([[low]*self.QperS for low in [1,0,1]]), 
+                                                high=np.array([[high]*self.QperS for high in [self.params.n_question, 1, self.params.n_pid]]),
+                                                shape=(3,self.QperS),
+                                                type=np.int32
+                                                ) 
    
         self.reset()
     
@@ -39,9 +45,9 @@ class PracticeProblemEnv(gym.Env):
     def reset(self, seed=None):
         self.history = {'q':[],'target':[],'pid':[]} # Initialize past interactions
         self.curr_step = 0
-        self.curr_q = -1
-        self.curr_pred = -1
-        self.curr_pid = -1
+        self.curr_q = [-1] * self.QperS
+        self.curr_pred = [-1] * self.QperS
+        self.curr_pid = [-1] * self.QperS
 
         return self.step(self.action_space.sample())[0], {}
 
@@ -64,22 +70,28 @@ class PracticeProblemEnv(gym.Env):
     
     def step(self, action):#action is an np int e.g. nparray(3) of the index of the action specified in self.actions
         self.curr_step += 1
-        self.curr_pid = self.actions[action]
-        self.curr_q = self.p_q_dict[self.curr_pid]
 
-        correct_prob = self.predict([self.curr_q],[self.curr_pid])
-        # correct_prob = self.predict()
-        self.curr_pred = np.random.rand() < correct_prob
+        # action is np.array of length QperS 
+        self.curr_pid = [self.actions[a] for a in action]
+        self.curr_q = [self.p_q_dict[pid] for pid in self.curr_pid]
+        self.curr_pred = []
 
-        # Update history with the action and the correctness
-        self.history['q'] += [self.curr_q]
-        self.history['target'] += [self.curr_pred]
-        self.history['pid'] += [self.curr_pid]
+        for q,pid in zip(self.curr_q,self.curr_pid):
+            
+            # Predict the probability of getting the question correct
+            correct_prob = self.predict([q],[pid])
+            pred = int(np.random.rand() < correct_prob)
+            self.curr_pred += [pred]
+
+            # Update history with the action and the correctness
+            self.history['q'] += [q]
+            self.history['target'] += [pred]
+            self.history['pid'] += [pid]
 
         if self.rew_func == "mock":
             reward = self._rew(n_PperQ=self.n_PperQ)
         elif self.rew_func == "correct":
-            reward = 1 if self.curr_pred else 0
+            reward = np.mean(self.curr_pred)
         else:
             raise NotImplementedError
             
