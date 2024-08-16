@@ -10,7 +10,7 @@ from load_data import DATA, PID_DATA
 from run import train, test
 from utils import try_makedirs, load_model, get_file_name_identifier
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-import pickle
+import json
 
 
 # assert torch.cuda.is_available(), "No Cuda available, AssertionError"
@@ -41,8 +41,11 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
     try_makedirs(os.path.join('result', params.model))
     try_makedirs(os.path.join('result', params.model, params.save))
 
-    with open(os.path.join('result', params.model, params.save,'args.pkl'), 'wb') as f:
-         pickle.dump(params, f)
+    # with open(os.path.join('result', params.model, params.save,'args.pkl'), 'wb') as f:
+    #      pickle.dump(params, f)
+
+    with open(os.path.join('result', params.model, params.save,'args.json'), 'w') as f:
+        json.dump(vars(params), f)
 
     for idx in range(params.max_iter):
         # Train Model

@@ -307,7 +307,7 @@ class MultiHeadAttention(nn.Module):
 
 def attention(q, k, v, d_k, mask, dropout, zero_pad, gamma=None):
     """
-    This is called by Multi-head atention object to find the values.
+    This is called by Multi-head attention object to find the values.
     """
     scores = torch.matmul(q, k.transpose(-2, -1)) / \
         math.sqrt(d_k)  # BS, 8, seqlen, seqlen
